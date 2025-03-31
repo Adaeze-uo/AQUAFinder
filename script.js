@@ -12,7 +12,6 @@ function generateFountainList(building) {
     return fountainList;
 }
 
-// Loop through buildings and add markers
 // Loop through each building and add markers
 buildings.forEach(function (building) {
     let marker = L.marker([building.lat, building.lng])
@@ -68,7 +67,7 @@ map.on("popupopen", function (e) {
 });
 
 
-
+// Adds functionality to all the buttons on the bottom left
 document.addEventListener("DOMContentLoaded", function () {
     let aboutButton = document.getElementById("about-button");
     let contributeButton = document.getElementById("contribute-button");
