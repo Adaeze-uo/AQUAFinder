@@ -13,36 +13,60 @@ function generateFountainList(building) {
 }
 
 // Loop through buildings and add markers
-buildings.forEach(building => {
+// Loop through each building and add markers
+buildings.forEach(function (building) {
     let marker = L.marker([building.lat, building.lng])
         .addTo(map)
         .bindPopup(generateFountainList(building));
 });
 
-// Event listener for dynamically created buttons
-document.body.addEventListener("click", function (event) {
-    if (event.target.classList.contains("fountain-button")) {
-        let button = event.target;
-        let buildingName = button.getAttribute("data-building");
-        let lat = parseFloat(button.getAttribute("data-lat"));
-        let lng = parseFloat(button.getAttribute("data-lng"));
-        let description = button.getAttribute("data-description");
-        let tags = button.getAttribute("data-tags")?.split(",") || [];
+// Function to generate fountain list in popups
+function generateFountainList(building) {
+    let fountainList = `<h3>${building.name}</h3><h4>Water Fountains:</h4>`;
+    
+    building.fountains.forEach((fountain, index) => {
+        fountainList += `<button class="fountain-button" 
+                            data-lat="${building.lat}" 
+                            data-lng="${building.lng}" 
+                            data-description="${fountain.description}" 
+                            data-tags="${fountain.tags.join(',')}">
+                            ${fountain.description}
+                         </button><br>`;
+    });
 
-        let isFunctional = tags[0] === "TRUE";
-        let fountainType = tags[1];
+    return fountainList;
+}
 
-        let detailedPopup = L.popup()
-            .setLatLng([lat, lng])
-            .setContent(
-                `<h4>${buildingName}</h4>
-                <p>Fountain: ${description}</p>
-                <p>In Bathroom: ${isFunctional ? "Yes" : "No"}</p>
-                <p>Type: ${fountainType}</p>`
-            )
-            .openOn(map);
-    }
+// Event listener for popup open
+map.on("popupopen", function (e) {
+    let popupContent = e.popup._contentNode;
+    if (!popupContent) return;
+
+    let buttons = popupContent.querySelectorAll(".fountain-button");
+
+    buttons.forEach((button) => {
+        button.addEventListener("click", function () {
+            let lat = parseFloat(this.getAttribute("data-lat"));
+            let lng = parseFloat(this.getAttribute("data-lng"));
+            let description = this.getAttribute("data-description");
+            let tags = this.getAttribute("data-tags").split(",");
+
+            let isFunctional = tags[0] === "TRUE";
+            let fountainType = tags[1];
+
+            L.popup()
+                .setLatLng([lat, lng])
+                .setContent(
+                    `<h4>Fountain Info</h4>
+                    <p><strong>Location:</strong> ${description}</p>
+                    <p><strong>In Bathroom:</strong> ${isFunctional ? "Yes" : "No"}</p>
+                    <p><strong>Type:</strong> ${fountainType}</p>`
+                )
+                .openOn(map);
+        });
+    });
 });
+
 
 
 document.addEventListener("DOMContentLoaded", function () {
